@@ -1,0 +1,575 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title|default:"Nowa strona PDT" }} - Tivano{% endblock %}
+
+{% block extra_css %}
+.delete-operation-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.btn-add-operation {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    padding: 0.85rem 2rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(89, 13, 26, 0.3);
+}
+
+.btn-add-operation:hover {
+    opacity: 0.9;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(89, 13, 26, 0.4);
+}
+
+.btn-add-operation i {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Nagłówek -->
+        <div class="page-header">
+            <h1 class="h3 mb-0">
+                <i class="bi bi-file-text"></i> {{ title|default:"FORM_PDT_01" }}
+            </h1>
+        </div>
+
+        <!-- Formularz -->
+        <form method="post" enctype="multipart/form-data" id="pdtForm">
+            {% csrf_token %}
+
+            <!-- Sekcja: Samolot i podstawowe dane -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="section-title">
+                        <i class="bi bi-airplane"></i> SAMOLOT - DANE PDT
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Samolot -->
+                        <div class="col-md-6">
+                            <label for="{{ form.aircraft.id_for_label }}" class="form-label">
+                                {{ form.aircraft.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.aircraft }}
+                            {% if form.aircraft.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.aircraft.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Data PDT -->
+                        <div class="col-md-3">
+                            <label for="{{ form.pdt_date.id_for_label }}" class="form-label">
+                                {{ form.pdt_date.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.pdt_date }}
+                            {% if form.pdt_date.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.pdt_date.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nr strony -->
+                        <div class="col-md-3">
+                            <label for="{{ form.page_number.id_for_label }}" class="form-label">
+                                {{ form.page_number.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.page_number }}
+                            {% if form.page_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.page_number.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Zdjęcie -->
+                        <div class="col-md-12">
+                            <label for="{{ form.photo.id_for_label }}" class="form-label">
+                                {{ form.photo.label }}
+                            </label>
+                            {{ form.photo }}
+                            {% if form.photo.errors %}
+                                <div class="invalid-feedback d-block">{{ form.photo.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> Opcjonalnie: dodaj zdjęcie do strony PDT
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sekcja: Paliwo i olej -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- PAX -->
+                        <div class="col-md-2">
+                            <label for="{{ form.persons_on_board.id_for_label }}" class="form-label">
+                                {{ form.persons_on_board.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.persons_on_board }}
+                            {% if form.persons_on_board.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.persons_on_board.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Paliwo dolane -->
+                        <div class="col-md-2">
+                            <label class="form-label">PALIWO</label>
+                            <label for="{{ form.fuel_added.id_for_label }}" class="form-label text-muted small">
+                                {{ form.fuel_added.label }}
+                            </label>
+                            {{ form.fuel_added }}
+                            {% if form.fuel_added.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fuel_added.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Paliwo do startu -->
+                        <div class="col-md-2">
+                            <label class="form-label">PALIWO</label>
+                            <label for="{{ form.fuel_at_start.id_for_label }}" class="form-label text-muted small">
+                                {{ form.fuel_at_start.label }}
+                            </label>
+                            {{ form.fuel_at_start }}
+                            {% if form.fuel_at_start.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fuel_at_start.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Olej dolany -->
+                        <div class="col-md-2">
+                            <label class="form-label">OLEJ</label>
+                            <label for="{{ form.oil_added.id_for_label }}" class="form-label text-muted small">
+                                {{ form.oil_added.label }}
+                            </label>
+                            {{ form.oil_added }}
+                            {% if form.oil_added.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.oil_added.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Olej do startu -->
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <label for="{{ form.oil_at_start.id_for_label }}" class="form-label text-muted small">
+                                {{ form.oil_at_start.label }}
+                            </label>
+                            {{ form.oil_at_start }}
+                            {% if form.oil_at_start.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.oil_at_start.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sekcja: Operacje lotnicze -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="section-title mb-3">
+                        <i class="bi bi-compass"></i> WYKONANE OPERACJE LOTNICZE
+                    </div>
+
+                    {{ formset.management_form }}
+
+                    <div id="flight-operations-container">
+                        {% for form in formset %}
+                            <div class="flight-operation-row" data-formset-form>
+                                <!-- Numer operacji -->
+                                <div class="mb-2">
+                                    <span class="operation-number">{{ forloop.counter }}</span>
+                                    <strong>Nr. {{ forloop.counter }}</strong>
+
+                                    <!-- Przycisk usuwania -->
+                                    {% if not forloop.first %}
+                                        <button type="button" class="btn btn-sm btn-danger delete-operation-btn" onclick="deleteOperation(this)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Ukryte pola -->
+                                {{ form.id }}
+                                {% if form.DELETE %}
+                                    <div style="display: none;">{{ form.DELETE }}</div>
+                                {% endif %}
+
+                                <div class="row g-2">
+                                    <!-- Pilot -->
+                                    <div class="col-md-3">
+                                        <label for="{{ form.pilot.id_for_label }}" class="form-label">
+                                            {{ form.pilot.label }}
+                                        </label>
+                                        {{ form.pilot }}
+                                        {% if form.pilot.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.pilot.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- START -->
+                                    <div class="col-md-2">
+                                        <label class="form-label">START</label>
+                                        <label for="{{ form.departure_time.id_for_label }}" class="form-label text-muted small">Czas</label>
+                                        {{ form.departure_time }}
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">&nbsp;</label>
+                                        <label for="{{ form.departure_location.id_for_label }}" class="form-label text-muted small">Lotnisko</label>
+                                        {{ form.departure_location }}
+                                    </div>
+
+                                    <!-- LĄDOWANIE -->
+                                    <div class="col-md-2">
+                                        <label class="form-label">LĄDOWANIE</label>
+                                        <label for="{{ form.landing_time.id_for_label }}" class="form-label text-muted small">Czas</label>
+                                        {{ form.landing_time }}
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">&nbsp;</label>
+                                        <label for="{{ form.landing_location.id_for_label }}" class="form-label text-muted small">Lotnisko</label>
+                                        {{ form.landing_location }}
+                                    </div>
+
+                                    <!-- Ilość lądowań -->
+                                    <div class="col-md-1">
+                                        <label for="{{ form.number_of_landings.id_for_label }}" class="form-label">Ilość lądowań</label>
+                                        {{ form.number_of_landings }}
+                                    </div>
+
+                                    <!-- Czas lotu (obliczany automatycznie) -->
+                                    <div class="col-md-2">
+                                        <label class="form-label">Czas lotu</label>
+                                        <input type="text" class="form-control form-control-sm flight-time-display" readonly placeholder="HH:MM">
+                                    </div>
+
+                                    <!-- Licznik motogodzin -->
+                                    <div class="col-md-3">
+                                        <label for="{{ form.engine_hours_after_flight.id_for_label }}" class="form-label">Licznik motogodzin</label>
+                                        {{ form.engine_hours_after_flight }}
+                                    </div>
+                                </div>
+
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger mt-2">
+                                        {{ form.non_field_errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Przycisk dodawania nowej operacji -->
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-primary btn-add-operation" id="addOperationBtn">
+                            <i class="bi bi-plus-circle"></i> DODAJ NOWY ODCINEK
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sekcja: Uwagi i usterki -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="section-title">
+                        <i class="bi bi-chat-left-text"></i> UWAGI I USTERKI
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="{{ form.last_operation_notes.id_for_label }}" class="form-label">
+                                {{ form.last_operation_notes.label }}
+                            </label>
+                            {{ form.last_operation_notes }}
+                            {% if form.last_operation_notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.last_operation_notes.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Przyciski akcji -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'pdt_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Anuluj
+                </a>
+                <button type="button" class="btn btn-success btn-lg" id="saveBtn">
+                    <i class="bi bi-save"></i> Zapisz PDT
+                </button>
+            </div>
+        </form>
+
+        <!-- Modal potwierdzenia zapisu -->
+        <div class="modal fade" id="confirmSaveModal" tabindex="-1" aria-labelledby="confirmSaveModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmSaveModalLabel">
+                            <i class="bi bi-question-circle"></i> Potwierdzenie zapisu
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                    </div>
+                    <div class="modal-body">
+                        Czy na pewno chcesz zapisać stronę PDT?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Anuluj
+                        </button>
+                        <button type="button" class="btn btn-success" id="confirmSaveBtn">
+                            <i class="bi bi-save"></i> Tak, zapisz
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Pobierz pusty formularz jako szablon
+    const emptyFormTemplate = document.querySelector('[data-formset-form]').cloneNode(true);
+
+    // Funkcja do znalezienia najwyższego indeksu formularza
+    function getMaxFormIndex() {
+        let maxIndex = -1;
+        const allForms = document.querySelectorAll('[data-formset-form]');
+
+        allForms.forEach(form => {
+            // Szukaj pola input z nazwą zawierającą indeks formularza
+            const inputs = form.querySelectorAll('input[name^="flight_operations-"]');
+            inputs.forEach(input => {
+                const match = input.name.match(/flight_operations-(\d+)-/);
+                if (match) {
+                    const index = parseInt(match[1]);
+                    if (index > maxIndex) {
+                        maxIndex = index;
+                    }
+                }
+            });
+        });
+
+        return maxIndex;
+    }
+
+    // Funkcja do aktualizacji TOTAL_FORMS
+    function updateTotalForms() {
+        const maxIndex = getMaxFormIndex();
+        document.querySelector('#id_flight_operations-TOTAL_FORMS').value = maxIndex + 1;
+    }
+
+    // Funkcja do przenumerowania wizualnych numerów operacji
+    function renumberOperations() {
+        const visibleOperations = document.querySelectorAll('[data-formset-form]:not([style*="display: none"])');
+        visibleOperations.forEach((op, index) => {
+            const numberElement = op.querySelector('.operation-number');
+            const strongElement = op.querySelector('strong');
+
+            if (numberElement) numberElement.textContent = index + 1;
+            if (strongElement) strongElement.textContent = `Nr. ${index + 1}`;
+        });
+    }
+
+    // Dodawanie nowej operacji
+    document.getElementById('addOperationBtn').addEventListener('click', function() {
+        const container = document.getElementById('flight-operations-container');
+        const newForm = emptyFormTemplate.cloneNode(true);
+
+        // Znajdź nowy indeks (najwyższy + 1)
+        const newIndex = getMaxFormIndex() + 1;
+
+        // Aktualizuj indeksy formularza w HTML
+        const formRegex = RegExp(`flight_operations-(\\d+)-`, 'g');
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `flight_operations-${newIndex}-`);
+
+        // Wyczyść wartości pól (bez ukrytych)
+        newForm.querySelectorAll('input, select, textarea').forEach(field => {
+            if (field.type !== 'hidden' && !field.name.includes('-id') && !field.name.includes('-DELETE')) {
+                field.value = '';
+            }
+        });
+
+        // Usuń zaznaczenie DELETE jeśli istnieje
+        const deleteCheckbox = newForm.querySelector('input[name$="-DELETE"]');
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = false;
+        }
+
+        // Wyczyść ID formularza (dla nowych formularzy)
+        const idField = newForm.querySelector('input[name$="-id"]');
+        if (idField) {
+            idField.value = '';
+        }
+
+        // Pokaż formularz (może być ukryty z szablonu)
+        newForm.style.display = '';
+
+        // Dodaj przycisk usuwania
+        const existingDeleteBtn = newForm.querySelector('.delete-operation-btn');
+        if (existingDeleteBtn) {
+            existingDeleteBtn.remove();
+        }
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn btn-sm btn-danger delete-operation-btn';
+        deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+        deleteBtn.onclick = function() { deleteOperation(this); };
+
+        const headerDiv = newForm.querySelector('.mb-2');
+        if (headerDiv) {
+            headerDiv.appendChild(deleteBtn);
+        }
+
+        // Dodaj do kontenera
+        container.appendChild(newForm);
+
+        // Aktualizuj TOTAL_FORMS
+        updateTotalForms();
+
+        // Przenumeruj wizualne numery
+        renumberOperations();
+
+        // Dodaj listener do automatycznego obliczania czasu lotu
+        addFlightTimeCalculation(newForm);
+    });
+
+    // Usuwanie operacji
+    function deleteOperation(button) {
+        const formRow = button.closest('[data-formset-form]');
+        const deleteCheckbox = formRow.querySelector('input[name$="-DELETE"]');
+        const idField = formRow.querySelector('input[name$="-id"]');
+
+        // Jeśli formularz ma ID (czyli istnieje w bazie), oznacz jako usunięty
+        if (idField && idField.value) {
+            if (deleteCheckbox) {
+                deleteCheckbox.checked = true;
+            }
+            formRow.style.display = 'none';
+        } else {
+            // Jeśli formularz jest nowy (bez ID), usuń go z DOM
+            formRow.remove();
+            // Aktualizuj TOTAL_FORMS
+            updateTotalForms();
+        }
+
+        // Przenumeruj pozostałe widoczne operacje
+        renumberOperations();
+    }
+
+    // Automatyczne obliczanie czasu lotu
+    function calculateFlightTime(departureInput, landingInput, flightTimeInput) {
+        const departure = departureInput.value;
+        const landing = landingInput.value;
+
+        if (departure && landing) {
+            const [depHours, depMinutes] = departure.split(':').map(Number);
+            let [landHours, landMinutes] = landing.split(':').map(Number);
+
+            // Obsługa lądowania następnego dnia
+            if (landHours < depHours || (landHours === depHours && landMinutes < depMinutes)) {
+                landHours += 24;
+            }
+
+            const totalDepMinutes = depHours * 60 + depMinutes;
+            const totalLandMinutes = landHours * 60 + landMinutes;
+            const flightMinutes = totalLandMinutes - totalDepMinutes;
+
+            const hours = Math.floor(flightMinutes / 60);
+            const minutes = flightMinutes % 60;
+
+            flightTimeInput.value = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        }
+    }
+
+    // Dodaj listener do istniejących formularzy
+    function addFlightTimeCalculation(formRow) {
+        const departureInput = formRow.querySelector('input[name$="-departure_time"]');
+        const landingInput = formRow.querySelector('input[name$="-landing_time"]');
+        const flightTimeInput = formRow.querySelector('.flight-time-display');
+
+        if (departureInput && landingInput && flightTimeInput) {
+            departureInput.addEventListener('change', () => {
+                calculateFlightTime(departureInput, landingInput, flightTimeInput);
+            });
+
+            landingInput.addEventListener('change', () => {
+                calculateFlightTime(departureInput, landingInput, flightTimeInput);
+            });
+        }
+    }
+
+    // Inicjalizuj obliczanie czasu lotu dla wszystkich istniejących formularzy
+    document.querySelectorAll('[data-formset-form]').forEach(formRow => {
+        addFlightTimeCalculation(formRow);
+
+        // Oblicz i wyświetl czas lotu dla istniejących danych
+        const departureInput = formRow.querySelector('input[name$="-departure_time"]');
+        const landingInput = formRow.querySelector('input[name$="-landing_time"]');
+        const flightTimeInput = formRow.querySelector('.flight-time-display');
+        if (departureInput && landingInput && flightTimeInput && departureInput.value && landingInput.value) {
+            calculateFlightTime(departureInput, landingInput, flightTimeInput);
+        }
+    });
+
+    // Uppercase dla kodów ICAO
+    document.addEventListener('input', function(e) {
+        if (e.target.matches('input[name$="-departure_location"], input[name$="-landing_location"]')) {
+            e.target.value = e.target.value.toUpperCase();
+        }
+    });
+
+    // Walidacja formularza i obsługa modalu potwierdzenia
+    (function () {
+        'use strict'
+        const form = document.getElementById('pdtForm');
+        const saveBtn = document.getElementById('saveBtn');
+        const confirmSaveBtn = document.getElementById('confirmSaveBtn');
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmSaveModal'));
+
+        saveBtn.addEventListener('click', function () {
+            form.classList.add('was-validated');
+            if (!form.checkValidity()) {
+                return;
+            }
+            confirmModal.show();
+        });
+
+        confirmSaveBtn.addEventListener('click', function () {
+            confirmModal.hide();
+            form.submit();
+        });
+    })()
+</script>
+{% endblock %}

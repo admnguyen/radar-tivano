@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block title %}Harmonogram — Tivano{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Navigation bar ── */
+    .week-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* ── Outer scroll wrapper ── */
+    .sched-scroll {
+        overflow-x: auto;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border: 1px solid #e0e0e0;
+    }
+
+    /* ── CSS Grid ── */
+    .sched-grid {
+        display: grid;
+        grid-template-columns: 110px repeat(7, minmax(140px, 1fr));
+        min-width: 700px;
+        background: #e8e8e8;   /* gap colour */
+        gap: 1px;
+    }
+
+    /* ── Corner ── */
+    .sched-corner {
+        background: #3d0812;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 8px;
+    }
+
+    /* ── Day header ── */
+    .sched-day-hdr {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 10px 10px 8px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+    }
+
+    .sched-day-hdr.is-today {
+        background: linear-gradient(135deg, #1a6e35, #2ea84a);
+    }
+
+    .sched-day-abbr {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        opacity: 0.8;
+        font-weight: 600;
+    }
+
+    .sched-day-num {
+        font-size: 1.6rem;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .sched-day-month {
+        font-size: 0.7rem;
+        opacity: 0.8;
+    }
+
+    .sched-today-badge {
+        font-size: 0.6rem;
+        background: white;
+        color: #1a6e35;
+        border-radius: 20px;
+        padding: 1px 7px;
+        font-weight: 700;
+        margin-top: 2px;
+    }
+
+    /* ── Aircraft label ── */
+    .sched-aircraft {
+        background: var(--tivano-beige-light);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 12px;
+        gap: 2px;
+        min-height: 72px;
+    }
+
+    .sched-aircraft-reg {
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: var(--primary-color);
+        letter-spacing: 0.5px;
+    }
+
+    .sched-aircraft-sub {
+        font-size: 0.68rem;
+        color: #999;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ── Day cell ── */
+    .sched-cell {
+        background: #ffffff;
+        position: relative;
+        min-height: 72px;
+        /* Grid lines at 06(0%), 12(37.5%), 18(75%) */
+        background-image:
+            linear-gradient(90deg, #e8e8e8 1px, transparent 1px) 37.5% 0 / 37.5% 100%,
+            linear-gradient(90deg, #e8e8e8 1px, transparent 1px) 75%   0 / 37.5% 100%;
+    }
+
+    .sched-cell.is-today {
+        background-color: #f4fff7;
+        background-image:
+            linear-gradient(90deg, #c3e6cb 1px, transparent 1px) 37.5% 0 / 37.5% 100%,
+            linear-gradient(90deg, #c3e6cb 1px, transparent 1px) 75%   0 / 37.5% 100%;
+    }
+
+    /* Hour tick labels */
+    .sched-tick {
+        position: absolute;
+        top: 3px;
+        font-size: 0.58rem;
+        color: #ccc;
+        font-weight: 600;
+        pointer-events: none;
+        transform: translateX(-1px);
+    }
+
+    /* ── Reservation block ── */
+    .res-block {
+        position: absolute;
+        top: 18px;
+        bottom: 10px;
+        border-radius: 5px;
+        color: white;
+        font-size: 0.68rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        padding: 0 6px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.22);
+        cursor: default;
+        z-index: 2;
+        transition: top 0.1s, bottom 0.1s, box-shadow 0.1s;
+        min-width: 4px;
+    }
+
+    .res-block:hover {
+        top: 14px;
+        bottom: 6px;
+        box-shadow: 0 5px 14px rgba(0,0,0,0.32);
+        z-index: 20;
+        overflow: visible;
+    }
+
+    /* reservation colour — magenta */
+    .rc0, .rc1, .rc2, .rc3, .rc4, .rc5 {
+        background: linear-gradient(135deg, #8B0057, #D81B60);
+    }
+
+    .res-del {
+        margin-left: auto;
+        padding-left: 5px;
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .res-del:hover { color: #fff; }
+
+    /* empty hint */
+    .sched-free {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #e0e0e0;
+        font-size: 0.7rem;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+
+    <!-- Week navigation -->
+    <div class="card mb-3">
+        <div class="card-body py-2 px-3">
+            <div class="week-nav">
+                <a href="?week={{ prev_week }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-chevron-left"></i> Poprzedni
+                </a>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                    <strong>{{ week_start|date:"j N Y" }} — {{ week_end|date:"j N Y" }}</strong>
+                    {% if today >= week_start and today <= week_end %}
+                        <span class="badge bg-success">Bieżący tydzień</span>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <a href="{% url 'create_reservation' %}?week={{ week_start|date:'Y-m-d' }}"
+                       class="btn btn-primary btn-sm ms-1">
+                        <i class="bi bi-plus-lg me-1"></i>Nowa rezerwacja
+                    </a>
+                    {% endif %}
+                </div>
+
+                <a href="?week={{ next_week }}" class="btn btn-outline-secondary btn-sm">
+                    Następny <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="sched-scroll">
+        <div class="sched-grid">
+
+            <!-- Row 1: corner + day headers -->
+            <div class="sched-corner">
+                <i class="bi bi-calendar3 text-white" style="opacity:.4;font-size:1.4rem;"></i>
+            </div>
+            {% for day_data in schedule %}
+            <div class="sched-day-hdr {% if day_data.is_today %}is-today{% endif %}">
+                <span class="sched-day-abbr">{{ day_data.day|date:"D" }}</span>
+                <span class="sched-day-num">{{ day_data.day|date:"j" }}</span>
+                <span class="sched-day-month">{{ day_data.day|date:"N Y" }}</span>
+                {% if day_data.is_today %}<span class="sched-today-badge">Dziś</span>{% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- Rows 2+: one per aircraft -->
+            {% if no_aircraft %}
+            <div style="grid-column:1/-1;padding:3rem;text-align:center;background:white;color:#aaa;">
+                <i class="bi bi-airplane fs-2 d-block mb-2"></i>
+                Brak aktywnych samolotów w systemie.
+            </div>
+            {% else %}
+            {% for aircraft_row in aircraft_schedule %}
+
+            <!-- Aircraft label -->
+            <div class="sched-aircraft">
+                <span class="sched-aircraft-reg">
+                    <i class="bi bi-airplane me-1" style="opacity:.4;font-size:.8rem;"></i>{{ aircraft_row.aircraft.registration_marks }}
+                </span>
+                <span class="sched-aircraft-sub">{{ aircraft_row.aircraft.manufacturer }} {{ aircraft_row.aircraft.aircraft_type }}</span>
+            </div>
+
+            <!-- 7 day cells -->
+            {% for day in aircraft_row.days %}
+            <div class="sched-cell {% if day.is_today %}is-today{% endif %}">
+                <!-- Hour ticks -->
+                <span class="sched-tick" style="left:0%">06</span>
+                <span class="sched-tick" style="left:37.5%">12</span>
+                <span class="sched-tick" style="left:75%">18</span>
+
+                {% if not day.reservations %}
+                <div class="sched-free">wolny</div>
+                {% endif %}
+
+                {% for r in day.reservations %}
+                <div class="res-block rc{{ r.color_index }}"
+                     style="left:{{ r.left_pct }}%;width:{{ r.width_pct }}%;"
+                     data-bs-toggle="tooltip"
+                     data-bs-placement="top"
+                     data-bs-html="true"
+                     title="{{ r.reservation.pilot.user.get_full_name }}<br>{{ r.start_str }} – {{ r.end_str }}{% if r.reservation.notes %}<br>{{ r.reservation.notes }}{% endif %}">
+                    {{ r.reservation.pilot.user.last_name }}
+                    {% if user.is_staff %}
+                    <a href="{% url 'delete_reservation' r.reservation.pk %}"
+                       class="res-del" title="Usuń" onclick="event.stopPropagation()">✕</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            {% endfor %}
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Legend -->
+    {% if not no_aircraft %}
+    <p class="text-muted small mt-2 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Linie siatki: 06:00 · 12:00 · 18:00 · koniec osi: 22:00.
+        Każdy pilot ma przypisany stały kolor w danym tygodniu.
+        Najedź na blok aby zobaczyć szczegóły.
+    </p>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        new bootstrap.Tooltip(el);
+    });
+</script>
+{% endblock %}

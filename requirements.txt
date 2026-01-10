@@ -1,0 +1,16 @@
+asgiref==3.11.0
+dj-database-url==2.3.0
+Django==5.2.8
+environs==14.5.0
+gunicorn==23.0.0
+marshmallow==4.1.0
+packaging==25.0
+pillow==10.4.0
+psycopg==3.2.13
+psycopg-binary==3.2.13
+python-dateutil==2.9.0.post0
+python-dotenv==1.2.1
+six==1.17.0
+sqlparse==0.5.4
+tzdata==2025.2
+whitenoise==6.11.0

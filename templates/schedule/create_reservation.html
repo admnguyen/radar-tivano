@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} — Tivano{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="bi bi-calendar-plus me-2"></i>{{ title }}</h1>
+                <p class="mb-0 opacity-75">Przypisz pilota do samolotu w wybranym czasie</p>
+            </div>
+            <a href="{% url 'schedule' %}" class="btn btn-light">
+                <i class="bi bi-arrow-left me-1"></i>Powrót
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <div class="section-title"><i class="bi bi-airplane"></i>Samolot i pilot</div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.aircraft.label }} <span class="text-danger">*</span></label>
+                                {{ form.aircraft }}
+                                {% if form.aircraft.errors %}
+                                <div class="invalid-feedback d-block">{{ form.aircraft.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.pilot.label }} <span class="text-danger">*</span></label>
+                                {{ form.pilot }}
+                                {% if form.pilot.errors %}
+                                <div class="invalid-feedback d-block">{{ form.pilot.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="section-title"><i class="bi bi-clock"></i>Czas rezerwacji</div>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label">{{ form.start_datetime.label }} <span class="text-danger">*</span></label>
+                                    {{ form.start_datetime }}
+                                    {% if form.start_datetime.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.start_datetime.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label">{{ form.end_datetime.label }} <span class="text-danger">*</span></label>
+                                    {{ form.end_datetime }}
+                                    {% if form.end_datetime.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.end_datetime.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="section-title"><i class="bi bi-chat-text"></i>Uwagi</div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.notes.label }}</label>
+                                {{ form.notes }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'schedule' %}" class="btn btn-secondary">Anuluj</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>Zapisz rezerwację
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
