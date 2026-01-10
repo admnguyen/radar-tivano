@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista PDT - Tivano{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Naglowek -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="bi bi-file-earmark-text"></i> Lista stron PDT
+                    </h1>
+                    <p class="mb-0 opacity-75">Zarzadzanie kartami operacji lotniczych</p>
+                </div>
+                <a href="{% url 'create_pdt_page' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-plus-circle"></i> Nowa strona PDT
+                </a>
+            </div>
+        </div>
+
+        <!-- Filtry -->
+        <div class="card mb-4">
+            <div class="card-body py-3">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="aircraft" class="form-label mb-1">Samolot</label>
+                        <select name="aircraft" id="aircraft" class="form-select form-select-sm">
+                            <option value="">-- Wszystkie samoloty --</option>
+                            {% for aircraft in aircraft_list %}
+                                <option value="{{ aircraft.pk }}" {% if selected_aircraft == aircraft.pk|stringformat:"i" %}selected{% endif %}>
+                                    {{ aircraft.registration_marks }} ({{ aircraft.manufacturer }} {{ aircraft.aircraft_type }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="date_from" class="form-label mb-1">Data od</label>
+                        <input type="date" name="date_from" id="date_from" class="form-control form-control-sm" value="{{ date_from }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="date_to" class="form-label mb-1">Data do</label>
+                        <input type="date" name="date_to" id="date_to" class="form-control form-control-sm" value="{{ date_to }}">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary btn-sm me-2">
+                            <i class="bi bi-search"></i> Filtruj
+                        </button>
+                        <a href="{% url 'pdt_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-x-circle"></i> Wyczysc
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="card">
+            <div class="card-body">
+                {% if pdt_pages %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle list-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nr strony</th>
+                                    <th>Data PDT</th>
+                                    <th>Samolot</th>
+                                    <th>Znaki rej.</th>
+                                    <th>Pilot</th>
+                                    <th>Trasa</th>
+                                    <th class="text-center">Operacje</th>
+                                    <th class="text-center">PAX</th>
+                                    <th class="text-end">Akcje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pdt in pdt_pages %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ pdt.page_number }}</strong>
+                                        </td>
+                                        <td>{{ pdt.pdt_date|date:"Y-m-d" }}</td>
+                                        <td>
+                                            <span class="badge badge-custom">
+                                                {{ pdt.aircraft.manufacturer }} {{ pdt.aircraft.aircraft_type }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ pdt.aircraft.registration_marks }}</strong>
+                                        </td>
+                                        <td>
+                                            {% with operations=pdt.flight_operations.all %}
+                                                {% if operations %}
+                                                    {% regroup operations by pilot as pilot_list %}
+                                                    {% for pilot_group in pilot_list %}
+                                                        <span class="badge bg-secondary">
+                                                            <i class="bi bi-person-fill"></i> {{ pilot_group.grouper.user.last_name }}
+                                                        </span>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        <td>
+                                            {% with operations=pdt.flight_operations.all %}
+                                                {% if operations %}
+                                                    {% with first_op=operations.first last_op=operations.last %}
+                                                        <span class="route-display">
+                                                            <code>{{ first_op.departure_location }}</code>
+                                                            <i class="bi bi-arrow-right mx-1"></i>
+                                                            <code>{{ last_op.landing_location }}</code>
+                                                        </span>
+                                                    {% endwith %}
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ pdt.flight_operations.count }}
+                                        </td>
+                                        <td class="text-center">{{ pdt.persons_on_board }}</td>
+                                        <td class="text-end">
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'pdt_detail' pdt.pk %}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="Szczegoly">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'edit_pdt_page' pdt.pk %}"
+                                                   class="btn btn-sm btn-outline-secondary"
+                                                   title="Edytuj">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                        <h3 class="mt-3 text-muted">Brak stron PDT</h3>
+                        <p class="text-muted">
+                            {% if selected_aircraft or date_from or date_to %}
+                                Nie znaleziono stron PDT dla wybranych kryteriow
+                            {% else %}
+                                Rozpocznij od utworzenia pierwszej strony PDT
+                            {% endif %}
+                        </p>
+                        {% if not selected_aircraft and not date_from and not date_to %}
+                            <a href="{% url 'create_pdt_page' %}" class="btn btn-primary mt-3">
+                                <i class="bi bi-plus-circle"></i> Utworz pierwsza strone PDT
+                            </a>
+                        {% else %}
+                            <a href="{% url 'pdt_list' %}" class="btn btn-outline-secondary mt-3">
+                                <i class="bi bi-x-circle"></i> Wyczysc filtry
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Delikatne linie pionowe w tabeli */
+    .list-table {
+        font-size: 0.95rem;
+    }
+
+    .list-table th,
+    .list-table td {
+        border-left: 1px solid #e9ecef;
+        padding: 0.875rem 0.75rem;
+    }
+
+    .list-table th:first-child,
+    .list-table td:first-child {
+        border-left: none;
+    }
+
+    .list-table th {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .list-table td {
+        vertical-align: middle;
+    }
+
+    /* Styl dla wyswietlania trasy */
+    .route-display {
+        white-space: nowrap;
+        font-size: 0.9rem;
+    }
+
+    .route-display code {
+        font-weight: 600;
+        padding: 0.2rem 0.4rem;
+        font-size: 0.85rem;
+    }
+
+    .route-display .bi-arrow-right {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
