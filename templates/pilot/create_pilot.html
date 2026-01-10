@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Tivano{% endblock %}
+
+{% block content %}
+<!-- Nagłówek -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-person-fill"></i> {{ title }}
+        </h1>
+        <a href="{% url 'pilot_list' %}" class="btn btn-light">
+            <i class="bi bi-arrow-left"></i> Powrót
+        </a>
+    </div>
+</div>
+
+<!-- Formularz -->
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    <!-- Dane użytkownika -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title">
+                <i class="bi bi-person-badge"></i> Dane osobowe
+            </div>
+
+            <div class="row g-3">
+                <!-- Imię -->
+                <div class="col-md-6">
+                    <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
+                        {{ user_form.first_name.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ user_form.first_name }}
+                    {% if user_form.first_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ user_form.first_name.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Nazwisko -->
+                <div class="col-md-6">
+                    <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
+                        {{ user_form.last_name.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ user_form.last_name }}
+                    {% if user_form.last_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ user_form.last_name.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6">
+                    <label for="{{ user_form.email.id_for_label }}" class="form-label">
+                        {{ user_form.email.label }}
+                    </label>
+                    {{ user_form.email }}
+                    {% if user_form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ user_form.email.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Username -->
+                <div class="col-md-6">
+                    <label for="{{ user_form.username.id_for_label }}" class="form-label">
+                        {{ user_form.username.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ user_form.username }}
+                    {% if user_form.username.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ user_form.username.errors }}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Używane do logowania</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dane pilota -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title">
+                <i class="bi bi-award"></i> Licencja i kontakt
+            </div>
+
+            <div class="row g-3">
+                <!-- Numer licencji -->
+                <div class="col-md-6">
+                    <label for="{{ pilot_form.license_number.id_for_label }}" class="form-label">
+                        {{ pilot_form.license_number.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ pilot_form.license_number }}
+                    {% if pilot_form.license_number.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ pilot_form.license_number.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Telefon -->
+                <div class="col-md-6">
+                    <label for="{{ pilot_form.phone_number.id_for_label }}" class="form-label">
+                        {{ pilot_form.phone_number.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ pilot_form.phone_number }}
+                    {% if pilot_form.phone_number.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ pilot_form.phone_number.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ważności -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title">
+                <i class="bi bi-calendar-check"></i> Ważności uprawnień
+            </div>
+
+            <div class="row g-3">
+                <!-- SEPL -->
+                <div class="col-md-6">
+                    <label for="{{ pilot_form.sepl_valid_until.id_for_label }}" class="form-label">
+                        {{ pilot_form.sepl_valid_until.label }}
+                    </label>
+                    {{ pilot_form.sepl_valid_until }}
+                    {% if pilot_form.sepl_valid_until.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ pilot_form.sepl_valid_until.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Medical -->
+                <div class="col-md-6">
+                    <label for="{{ pilot_form.medical_valid_until.id_for_label }}" class="form-label">
+                        {{ pilot_form.medical_valid_until.label }}
+                    </label>
+                    {{ pilot_form.medical_valid_until }}
+                    {% if pilot_form.medical_valid_until.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ pilot_form.medical_valid_until.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status i uprawnienia -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title">
+                <i class="bi bi-shield-check"></i> Status i uprawnienia
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        {{ pilot_form.is_active }}
+                        <label class="form-check-label" for="{{ pilot_form.is_active.id_for_label }}">
+                            {{ pilot_form.is_active.label }}
+                        </label>
+                        {% if pilot_form.is_active.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ pilot_form.is_active.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-check">
+                        {{ user_form.is_staff }}
+                        <label class="form-check-label" for="{{ user_form.is_staff.id_for_label }}">
+                            {{ user_form.is_staff.label }}
+                        </label>
+                        {% if user_form.is_staff.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ user_form.is_staff.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted d-block">Administratorzy mogą edytować PDT, samoloty i pilotów</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Przyciski -->
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a href="{% url 'pilot_list' %}" class="btn btn-secondary">
+            <i class="bi bi-x-circle"></i> Anuluj
+        </a>
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="bi bi-save"></i> Zapisz pilota
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Walidacja Bootstrap
+    (function () {
+        'use strict'
+        const forms = document.querySelectorAll('form')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}

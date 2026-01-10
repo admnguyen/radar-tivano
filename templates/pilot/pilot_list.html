@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista pilotow - Tivano{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Naglowek -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="bi bi-people-fill"></i> Lista pilotow
+                    </h1>
+                    <p class="mb-0 opacity-75">Zarzadzanie zaloga lotnicza</p>
+                </div>
+                <a href="{% url 'create_pilot' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-plus-circle"></i> Nowy pilot
+                </a>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="card">
+            <div class="card-body">
+                {% if pilots_data %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle list-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nazwisko i imie</th>
+                                    <th>Nr licencji</th>
+                                    <th>Telefon</th>
+                                    <th>Email</th>
+                                    <th class="text-center">SEPL(A)</th>
+                                    <th class="text-center">Badania MED.</th>
+                                    <th class="text-end">Akcje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in pilots_data %}
+                                    <tr>
+                                        <td>
+                                            <strong class="text-primary">
+                                                {{ data.pilot.user.last_name }} {{ data.pilot.user.first_name }}
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <code>{{ data.pilot.license_number }}</code>
+                                        </td>
+                                        <td>
+                                            {{ data.pilot.phone_number }}
+                                        </td>
+                                        <td>
+                                            {% if data.pilot.user.email %}
+                                                <small class="text-muted">{{ data.pilot.user.email }}</small>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if data.pilot.sepl_valid_until %}
+                                                <span class="badge bg-{{ data.sepl_status|default:'secondary' }}">
+                                                    {{ data.pilot.sepl_valid_until|date:"Y-m-d" }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if data.pilot.medical_valid_until %}
+                                                <span class="badge bg-{{ data.medical_status|default:'secondary' }}">
+                                                    {{ data.pilot.medical_valid_until|date:"Y-m-d" }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'pilot_detail' data.pilot.pk %}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="Szczegoly">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'edit_pilot' data.pilot.pk %}"
+                                                   class="btn btn-sm btn-outline-secondary"
+                                                   title="Edytuj">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-people" style="font-size: 4rem; color: #ccc;"></i>
+                        <h3 class="mt-3 text-muted">Brak pilotow</h3>
+                        <p class="text-muted">Rozpocznij od dodania pierwszego pilota</p>
+                        <a href="{% url 'create_pilot' %}" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle"></i> Dodaj pierwszego pilota
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Delikatne linie pionowe w tabeli */
+    .list-table {
+        font-size: 0.95rem;
+    }
+
+    .list-table th,
+    .list-table td {
+        border-left: 1px solid #e9ecef;
+        padding: 0.875rem 0.75rem;
+    }
+
+    .list-table th:first-child,
+    .list-table td:first-child {
+        border-left: none;
+    }
+
+    .list-table th {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .list-table td {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
