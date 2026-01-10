@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ pilot.user.get_full_name }} - Tivano{% endblock %}
+
+{% block content %}
+<!-- Nagłówek -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="h2 mb-2">
+                <i class="bi bi-person-fill"></i>
+                {{ pilot.user.last_name }} {{ pilot.user.first_name }}
+            </h1>
+            <p class="mb-0 opacity-75">
+                Licencja: {{ pilot.license_number }}
+            </p>
+        </div>
+        <div class="text-end">
+            <div class="btn-group" role="group">
+                <a href="{% url 'pilot_list' %}" class="btn btn-light">
+                    <i class="bi bi-arrow-left"></i> Lista
+                </a>
+                {% if is_own_profile or can_edit %}
+                    <a href="{% url 'change_password' pilot.pk %}" class="btn btn-primary">
+                        <i class="bi bi-key"></i> Zmień hasło
+                    </a>
+                {% endif %}
+                {% if can_edit %}
+                    <a href="{% url 'edit_pilot' pilot.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Edytuj
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prominent Create PDT Button -->
+<div class="mb-4 text-center">
+    <a href="{% url 'create_pdt_page' %}" class="btn btn-tivano-primary btn-lg">
+        <i class="bi bi-plus-circle"></i> STWÓRZ NOWĄ STRONĘ PDT
+    </a>
+</div>
+
+<!-- Statystyki -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_flights }}</div>
+            <div class="stat-label">Wykonanych lotów</div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_landings }}</div>
+            <div class="stat-label">Całkowita liczba lądowań</div>
+        </div>
+    </div>
+</div>
+
+<!-- Dane pilota -->
+<div class="card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-person-badge"></i> Dane pilota
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-label">Imię i nazwisko</div>
+                    <div class="info-value">{{ pilot.user.get_full_name }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-label">Nr. Licencji</div>
+                    <div class="info-value"><code>{{ pilot.license_number }}</code></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-label">Status</div>
+                    <div class="info-value">
+                        {% if pilot.is_active %}
+                            <span class="badge bg-success">Aktywny</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Nieaktywny</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">
+                        {% if pilot.user.email %}
+                            <i class="bi bi-envelope"></i> {{ pilot.user.email }}
+                        {% else %}
+                            <span class="text-muted">Nie podano</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Telefon</div>
+                    <div class="info-value">
+                        <i class="bi bi-telephone"></i> {{ pilot.phone_number }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ważności -->
+<div class="card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-calendar-check"></i> Ważności uprawnień
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Data ważności SEPL(A)</div>
+                    <div class="info-value">
+                        {% if pilot.sepl_valid_until %}
+                            <span class="badge bg-{{ sepl_status|default:'secondary' }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                {{ pilot.sepl_valid_until|date:"Y-m-d" }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">Nie ustawiono</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Data ważności badań MED.</div>
+                    <div class="info-value">
+                        {% if pilot.medical_valid_until %}
+                            <span class="badge bg-{{ medical_status|default:'secondary' }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                {{ pilot.medical_valid_until|date:"Y-m-d" }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">Nie ustawiono</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ostatnie operacje lotnicze -->
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-compass"></i> Ostatnie operacje lotnicze
+            {% if flight_operations %}
+                <span class="badge bg-primary ms-2">{{ flight_operations|length }}</span>
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if flight_operations %}
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Samolot</th>
+                            <th>Trasa</th>
+                            <th>Start</th>
+                            <th>Lądowanie</th>
+                            <th>Czas lotu</th>
+                            <th>Lądowania</th>
+                            <th class="text-end">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for operation in flight_operations %}
+                            <tr>
+                                <td>
+                                    <small>{{ operation.pdt_page.pdt_date|date:"Y-m-d" }}</small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ operation.pdt_page.aircraft.registration_marks }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        {{ operation.departure_location }}
+                                        <i class="bi bi-arrow-right"></i>
+                                        {{ operation.landing_location }}
+                                    </span>
+                                </td>
+                                <td><small>{{ operation.departure_time|time:"H:i" }}</small></td>
+                                <td><small>{{ operation.landing_time|time:"H:i" }}</small></td>
+                                <td>
+                                    <small class="text-primary">
+                                        <i class="bi bi-clock"></i> {{ operation.get_flight_time_formatted }}
+                                    </small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">{{ operation.number_of_landings }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'pdt_detail' operation.pdt_page.pk %}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> PDT
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i>
+                Brak operacji lotniczych dla tego pilota
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

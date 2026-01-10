@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py check:*)",
+      "Bash(python manage.py runserver:*)",
+      "Bash(timeout 3 bash:*)",
+      "Bash(poetry lock:*)",
+      "Bash(poetry install:*)",
+      "Bash(python manage.py:*)",
+      "WebFetch(domain:www.tivanoair.com)",
+      "WebSearch",
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(poetry add:*)",
+      "Bash(poetry export:*)",
+      "Bash(poetry --version:*)",
+      "Bash(git rm:*)",
+      "Bash(test:*)",
+      "Bash(python:*)",
+      "Bash(npm i:*)",
+      "Bash(railway login:*)",
+      "Bash(.venvScriptspython.exe -c \"import ast; ast.parse\\(open\\(''app/views.py''\\).read\\(\\)\\)\")",
+      "Bash(dir:*)",
+      "Bash(ruff check:*)",
+      "Bash(poetry run ruff check:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

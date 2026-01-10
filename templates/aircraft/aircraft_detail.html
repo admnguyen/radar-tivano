@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ aircraft.registration_marks }} - Tivano{% endblock %}
+
+{% block content %}
+<!-- Nagłówek -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="h2 mb-2">
+                <i class="bi bi-airplane-fill"></i>
+                {{ aircraft.registration_marks }}
+            </h1>
+            <p class="mb-0 opacity-75">
+                {{ aircraft.manufacturer }} {{ aircraft.aircraft_type }}
+            </p>
+        </div>
+        <div class="text-end">
+            <div class="btn-group" role="group">
+                <a href="{% url 'aircraft_list' %}" class="btn btn-light">
+                    <i class="bi bi-arrow-left"></i> Lista
+                </a>
+                <a href="{% url 'edit_aircraft' aircraft.pk %}" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Edytuj
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statystyki -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-number stat-normal">{{ total_flight_hours }}</div>
+            <div class="stat-label">Calkowity nalot [GGG:MM]</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-number stat-normal">{{ total_landings }}</div>
+            <div class="stat-label">Calkowita liczba ladowan</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-number stat-normal">{{ max_engine_hours }}</div>
+            <div class="stat-label">Licznik MTH (motogodziny)</div>
+        </div>
+    </div>
+</div>
+
+<!-- Zdjęcie samolotu -->
+{% if aircraft.photo %}
+<div class="card mb-4 aircraft-photo-card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-image"></i> Zdjęcie samolotu
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="aircraft-photo-container">
+            <img src="{{ aircraft.photo.url }}" alt="{{ aircraft.registration_marks }}" class="aircraft-photo">
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Dane podstawowe -->
+<div class="card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-info-circle"></i> Dane samolotu
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="info-box" style="border-left: 4px solid var(--primary-color); padding-left: 1rem;">
+                    <div class="info-label">Znaki rejestracyjne</div>
+                    <div class="info-value" style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">
+                        <i class="bi bi-tag-fill"></i> {{ aircraft.registration_marks }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-label">Producent</div>
+                    <div class="info-value">{{ aircraft.manufacturer }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-label">Typ samolotu</div>
+                    <div class="info-value">{{ aircraft.aircraft_type }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-label">Numer seryjny (S/N)</div>
+                    <div class="info-value"><code>{{ aircraft.serial_number }}</code></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-label">Bazowe godziny nalotu [GGG:MM]</div>
+                    <div class="info-value">
+                        <i class="bi bi-clock-history"></i> {{ aircraft.get_base_flight_hours_formatted }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-label">Bazowa liczba lądowań</div>
+                    <div class="info-value">
+                        <i class="bi bi-arrow-down-circle"></i> {{ aircraft.base_landings }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="info-box">
+                    <div class="info-label">Status</div>
+                    <div class="info-value">
+                        {% if aircraft.is_active %}
+                            <span class="badge bg-success">Aktywny</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Nieaktywny</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certyfikaty i ważności -->
+<div class="card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-shield-check"></i> Certyfikaty i ważności
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Data następnej obsługi</div>
+                    <div class="info-value">
+                        {% if aircraft.next_service_date %}
+                            <span class="badge bg-{{ next_service_status|default:'secondary' }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                {{ aircraft.next_service_date|date:"Y-m-d" }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">Nie ustawiono</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Nalot dla następnej obsługi [GGG:MM]</div>
+                    <div class="info-value">
+                        {% if aircraft.next_service_hours %}
+                            {{ aircraft.get_next_service_hours_formatted }}
+                        {% else %}
+                            <span class="text-muted">Nie ustawiono</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Data ważności ARC</div>
+                    <div class="info-value">
+                        {% if aircraft.arc_valid_until %}
+                            <span class="badge bg-{{ arc_status|default:'secondary' }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                {{ aircraft.arc_valid_until|date:"Y-m-d" }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">Nie ustawiono</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Data ważności OC</div>
+                    <div class="info-value">
+                        {% if aircraft.insurance_valid_until %}
+                            <span class="badge bg-{{ insurance_status|default:'secondary' }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                {{ aircraft.insurance_valid_until|date:"Y-m-d" }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">Nie ustawiono</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ostatnie operacje lotnicze -->
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-compass"></i> Ostatnie operacje lotnicze
+            {% if flight_operations %}
+                <span class="badge bg-primary ms-2">{{ flight_operations|length }}</span>
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if flight_operations %}
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Pilot</th>
+                            <th>Trasa</th>
+                            <th>Start</th>
+                            <th>Lądowanie</th>
+                            <th>Czas lotu</th>
+                            <th>Lądowania</th>
+                            <th class="text-end">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for operation in flight_operations %}
+                            <tr>
+                                <td><small>{{ operation.pdt_page.pdt_date|date:"Y-m-d" }}</small></td>
+                                <td><small class="text-muted">{{ operation.pilot.user.last_name }} {{ operation.pilot.user.first_name }}</small></td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        {{ operation.departure_location }}
+                                        <i class="bi bi-arrow-right"></i>
+                                        {{ operation.landing_location }}
+                                    </span>
+                                </td>
+                                <td><small>{{ operation.departure_time|time:"H:i" }}</small></td>
+                                <td><small>{{ operation.landing_time|time:"H:i" }}</small></td>
+                                <td>
+                                    <small class="text-primary">
+                                        <i class="bi bi-clock"></i> {{ operation.get_flight_time_formatted }}
+                                    </small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">{{ operation.number_of_landings }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'pdt_detail' operation.pdt_page.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> PDT
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i> Brak operacji lotniczych
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Usun pogrubienie z wartosci statystyk */
+    .stat-normal {
+        font-weight: 400 !important;
+    }
+
+    /* Stylowanie zdjecia samolotu */
+    .aircraft-photo-card {
+        overflow: hidden;
+    }
+
+    .aircraft-photo-container {
+        position: relative;
+        width: 100%;
+        height: 350px;
+        overflow: hidden;
+        background-color: #f8f9fa;
+    }
+
+    .aircraft-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.3s ease;
+    }
+
+    .aircraft-photo:hover {
+        transform: scale(1.02);
+    }
+
+    /* Responsywnosc dla mniejszych ekranow */
+    @media (max-width: 768px) {
+        .aircraft-photo-container {
+            height: 250px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .aircraft-photo-container {
+            height: 200px;
+        }
+    }
+</style>
+{% endblock %}

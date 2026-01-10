@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Strona Główna - Tivano{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="page-header text-center">
+            <h1 class="display-4 mb-3">
+                TIVANO RADAR
+            </h1>
+            <p class="lead mb-0">
+                System Zarządzania Lotami
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card text-center animate-fade-in shadow-sm border-0" style="animation-delay: 0.1s; border-left: 5px solid var(--primary-color) !important;">
+            <div class="card-body p-4">
+                <div class="mb-3" style="font-size: 4rem; color: var(--primary-color);">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                </div>
+                <h2 class="display-5 mb-2" style="font-weight: 800; color: var(--primary-color);">{{ stats.total_pdt }}</h2>
+                <p class="text-uppercase text-muted mb-3" style="font-weight: 600; letter-spacing: 1px; font-size: 0.9rem;">Stron PDT</p>
+                <a href="{% url 'pdt_list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-right-circle"></i> Zobacz wszystkie
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center animate-fade-in shadow-sm border-0" style="animation-delay: 0.2s; border-left: 5px solid #28a745 !important;">
+            <div class="card-body p-4">
+                <div class="mb-3" style="font-size: 4rem; color: #28a745;">
+                    <i class="bi bi-airplane-fill"></i>
+                </div>
+                <h2 class="display-5 mb-2" style="font-weight: 800; color: #28a745;">{{ stats.total_aircraft }}</h2>
+                <p class="text-uppercase text-muted mb-3" style="font-weight: 600; letter-spacing: 1px; font-size: 0.9rem;">Samolotów</p>
+                <a href="{% url 'aircraft_list' %}" class="btn btn-outline-success">
+                    <i class="bi bi-arrow-right-circle"></i> Zobacz flotę
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center animate-fade-in shadow-sm border-0" style="animation-delay: 0.3s; border-left: 5px solid #17a2b8 !important;">
+            <div class="card-body p-4">
+                <div class="mb-3" style="font-size: 4rem; color: #17a2b8;">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+                <h2 class="display-5 mb-2" style="font-weight: 800; color: #17a2b8;">{{ stats.total_pilots }}</h2>
+                <p class="text-uppercase text-muted mb-3" style="font-weight: 600; letter-spacing: 1px; font-size: 0.9rem;">Pilotów</p>
+                <a href="{% url 'pilot_list' %}" class="btn btn-outline-info">
+                    <i class="bi bi-arrow-right-circle"></i> Zobacz pilotów
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--tivano-beige-light) 0%, #ebe8e3 100%);">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning-fill" style="color: #ffc107;"></i>
+                    <span style="font-weight: 700;">Szybkie akcje</span>
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="{% url 'create_pdt_page' %}" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center" style="height: 70px; font-size: 1.1rem;">
+                            <i class="bi bi-plus-circle me-2" style="font-size: 1.5rem;"></i>
+                            <span>Nowa strona PDT</span>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'create_aircraft' %}" class="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center" style="height: 70px; font-size: 1.1rem;">
+                            <i class="bi bi-plus-circle me-2" style="font-size: 1.5rem;"></i>
+                            <span>Nowy samolot</span>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'create_pilot' %}" class="btn btn-info btn-lg w-100 d-flex align-items-center justify-content-center" style="height: 70px; font-size: 1.1rem; color: white;">
+                            <i class="bi bi-plus-circle me-2" style="font-size: 1.5rem;"></i>
+                            <span>Nowy pilot</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent PDT Pages -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--tivano-beige-light) 0%, #ebe8e3 100%);">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Ostatnie strony PDT
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_pdt %}
+                    <div class="list-group list-group-flush">
+                        {% for pdt in recent_pdt %}
+                            <a href="{% url 'pdt_detail' pdt.pk %}"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0">
+                                <div>
+                                    <h6 class="mb-1" style="font-weight: 700; color: var(--primary-color);">
+                                        <i class="bi bi-file-earmark-text"></i> PDT {{ pdt.page_number }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3"></i> {{ pdt.pdt_date|date:"Y-m-d" }}
+                                        <span class="mx-2">•</span>
+                                        <i class="bi bi-airplane"></i> {{ pdt.aircraft.registration_marks }}
+                                    </small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill" style="font-size: 0.85rem; padding: 0.5rem 0.85rem;">
+                                    {{ pdt.flight_operations.count }} <i class="bi bi-compass"></i>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'pdt_list' %}" class="btn btn-outline-primary">
+                            Zobacz wszystkie <i class="bi bi-arrow-right-circle"></i>
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <h3>Brak stron PDT</h3>
+                        <p>Rozpocznij od utworzenia pierwszej strony</p>
+                        <a href="{% url 'create_pdt_page' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-circle"></i> Utwórz pierwszą stronę
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Aircraft -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--tivano-beige-light) 0%, #ebe8e3 100%);">
+                <h5 class="mb-0">
+                    <i class="bi bi-airplane-engines"></i> Aktywne samoloty
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if active_aircraft %}
+                    <div class="list-group list-group-flush">
+                        {% for aircraft in active_aircraft %}
+                            <a href="{% url 'aircraft_detail' aircraft.pk %}"
+                               class="list-group-item list-group-item-action border-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <span class="badge badge-custom" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                                {{ aircraft.registration_marks }}
+                                            </span>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <i class="bi bi-airplane"></i>
+                                            {{ aircraft.manufacturer }} {{ aircraft.aircraft_type }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        {% if aircraft.next_service_date %}
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-wrench"></i> {{ aircraft.next_service_date|date:"Y-m-d" }}
+                                            </small>
+                                        {% endif %}
+                                        {% if aircraft.arc_valid_until %}
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-shield-check"></i> {{ aircraft.arc_valid_until|date:"Y-m-d" }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'aircraft_list' %}" class="btn btn-outline-success">
+                            Zobacz wszystkie <i class="bi bi-arrow-right-circle"></i>
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-airplane"></i>
+                        <h3>Brak samolotów</h3>
+                        <p>Dodaj pierwszy samolot do floty</p>
+                        <a href="{% url 'create_aircraft' %}" class="btn btn-success mt-2">
+                            <i class="bi bi-plus-circle"></i> Dodaj pierwszy samolot
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
